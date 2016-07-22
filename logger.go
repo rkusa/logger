@@ -1,4 +1,5 @@
-// A logger middleware for [rkgo/web](https://github.com/rkgo/web)
+// Package logger provides a logging middleware that works well (but not
+// exclusively) with [rkusa/web](https://github.com/rkusa/web).
 //
 //  app := web.New()
 //  app.Use(logger.Middleware())
@@ -7,29 +8,40 @@ package logger
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"time"
-
-	"github.com/rkgo/web"
 )
 
-func Middleware(logger *log.Logger) web.Middleware {
+type withStatus interface {
+	http.ResponseWriter
+	Status() int
+}
+
+func Middleware(logger *log.Logger) func(http.ResponseWriter, *http.Request, http.HandlerFunc) {
 	if logger == nil {
 		logger = log.New(os.Stdout, "[web] ", 0)
 	}
 
-	return func(ctx web.Context, next web.Next) {
+	return func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		start := time.Now()
 		logger.Printf(
 			">> %s %s",
-			ctx.Req().Method, ctx.Req().URL.Path,
+			r.Method, r.URL.Path,
 		)
 
-		next(ctx)
+		next(rw, r)
 
-		logger.Printf(
-			"<< %s %s %v in %v",
-			ctx.Req().Method, ctx.Req().URL.Path, ctx.Status(), time.Since(start),
-		)
+		if rw, ok := rw.(withStatus); ok {
+			logger.Printf(
+				"<< %s %s %d in %v",
+				r.Method, r.URL.Path, rw.Status(), time.Since(start),
+			)
+		} else {
+			logger.Printf(
+				"<< %s %s in %v",
+				r.Method, r.URL.Path, time.Since(start),
+			)
+		}
 	}
 }

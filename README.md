@@ -1,8 +1,8 @@
 # logger
 
-A logger middleware for [rkgo/web](https://github.com/rkgo/web)
+A logger middleware that works well (but not exclusively) with [rkusa/web](https://github.com/rkusa/web).
 
-[![GoDoc][godoc]](https://godoc.org/github.com/rkgo/logger)
+[![GoDoc][godoc]](https://godoc.org/github.com/rkusa/logger)
 
 ### Example
 
@@ -10,5 +10,9 @@ A logger middleware for [rkgo/web](https://github.com/rkgo/web)
 app := web.New()
 app.Use(logger.Middleware())
 ```
+
+## License
+
+[MIT](LICENSE)
 
 [godoc]: http://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square
